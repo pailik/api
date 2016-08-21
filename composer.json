@@ -1,0 +1,21 @@
+{
+  "name": "iMega/Kubikvest",
+  "description": "Api for Kubikvest-client.",
+  "keywords": ["database"],
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Dmitry gavriloff",
+      "email": "info@imega.ru"
+    }
+  ],
+  "autoload": {
+    "psr-4": {"Kubikvest\\": "src/Kubikvest"}
+  },
+  "require": {
+    "silex/silex": "v2.0.0",
+    "firebase/php-jwt": "v4.0.0",
+    "guzzlehttp/guzzle": "6.2.1",
+    "php-activerecord/php-activerecord":"v1.1.2"
+  }
+}
