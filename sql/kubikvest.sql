@@ -6,5 +6,5 @@ DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
   `userId` bigint(20) unsigned NOT NULL,
-  `accessToken` varchar(255) DEFAULT NULL,
+  `accessToken` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

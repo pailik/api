@@ -7,14 +7,13 @@ return [
     'client_id' => '',
     'client_secret' => '',
     'redirect_uri' => 'kubikvest.xyz',
-    'curl' => function (Application $app) {
-        $c = new GuzzleClient([
+    'curl' => function () {
+        return new GuzzleClient([
             'base_uri' => 'https://oauth.vk.com',
             'headers'  => ['content-type' => 'text/xml; charset=utf-8'],
             'http_errors' => false,
+            'debug' => false,
         ]);
-
-        $c->get('',[]);
     },
     'tasks' => [
         1 => [

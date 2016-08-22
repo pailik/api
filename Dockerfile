@@ -8,6 +8,6 @@ RUN echo "@stale http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/re
         php-mysqli && \
     rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["/bin/sh", "/app/images/teleport/entrypoints/teleport.sh"]
+ENTRYPOINT ["/bin/sh", "/app/entrypoint/kubikvest.sh"]
 
 CMD ["php-fpm", "-F", "-d error_reporting=E_ALL", "-d log_errors=ON", "-d error_log=/dev/stdout","-d display_errors=YES"]

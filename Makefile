@@ -19,12 +19,11 @@ start:
 		-v $(CURDIR)/sql:/sql \
 		--link kubikvest_db:kubikvest_db \
 		imega/mysql-client \
-		mysql --host=teleport_db -e "source /sql/kubikvest.sql"
+		mysql --host=kubikvest_db -e "source /sql/kubikvest.sql"
 
 	@docker run -d \
 		--name "kubikvest" \
 		-v $(CURDIR):/app \
-		-p 9005:9095 \
 		kubikvest/api \
 		php-fpm -F \
 			-d error_reporting=E_ALL \
@@ -35,8 +34,9 @@ start:
 
 	@docker run -d \
 		--name "kubikvest_nginx" \
-		--link kubikvest:kubikvest \
-		-p 80:80 \
+		--link kubikvest:service \
+		-v $(CURDIR):/app \
+		-p 8300:80 \
 		-v $(CURDIR)/sites-enabled:/etc/nginx/sites-enabled \
 		leanlabs/nginx
 

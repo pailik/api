@@ -14,15 +14,25 @@ $app    = new Application($config);
 $app->get('/auth', function(Request $request) use ($app) {
     $code = $request->get('code');
 
-    $response = $app['curl']->request('GET', '/access_token', [
-        'query' => [
-            'client_id'     => $app['client_id'],
-            'client_secret' => $app['client_secret'],
-            'redirect_uri'  => $app['redirect_uri'],
-        ]
-    ]);
+    try {
+        $response = $app['curl']->request('GET', '/access_token', [
+            'query' => [
+                'client_id'     => $app['client_id'],
+                'client_secret' => $app['client_secret'],
+                'redirect_uri'  => $app['redirect_uri'],
+                'code'          => $code,
+            ]
+        ]);
+    } catch (RuntimeException $e) {
+        return new JsonResponse(
+            [
+                'error' => $e->getMessage(),
+            ],
+            JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+        );
+    }
 
-    $data = json_decode($response->getContent(), true);
+    $data = json_decode($response->getBody()->__toString(), true);
 
     $user = new Model\User();
     $user->get($data['user_id']);
