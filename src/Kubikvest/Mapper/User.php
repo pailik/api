@@ -3,12 +3,28 @@
 namespace Kubikvest\Mapper;
 
 use Packaged\QueryBuilder\Assembler\QueryAssembler;
+use Kubikvest\Model;
 
+/**
+ * Class User
+ * @package Kubikvest\Mapper
+ */
 class User
 {
+    /**
+     * @var
+     */
     protected $pdo;
+
+    /**
+     * @var
+     */
     protected $queryBuilder;
 
+    /**
+     * @param $pdo
+     * @param $queryBuilder
+     */
     public function __construct($pdo, $queryBuilder)
     {
         $this->pdo = $pdo;
@@ -16,13 +32,37 @@ class User
     }
 
     /**
+     * @param int $userId
+     *
+     * @return Model\User
+     */
+    public function getUser($userId)
+    {
+        $user = new Model\User();
+        try {
+            $query = $this->queryBuilder->select('userId', 'accessToken', 'kvestId', 'pointId')->from('user')->where(['userId' => $userId]);
+            $record = $this->pdo->query(QueryAssembler::stringify($query))->fetch(\PDO::FETCH_ASSOC);
+            if (!empty($record)) {
+                $user->userId = (int) $record['userId'];
+                $user->accessToken = $record['accessToken'];
+                $user->kvestId = (int) $record['kvestId'];
+                $user->pointId = (int) $record['pointId'];
+            }
+        } catch(\Exception $e) {
+            //
+        }
+
+        return $user;
+    }
+
+    /**
      * @param string $accessToken
      *
-     * @return \Kubikvest\Model\User
+     * @return Model\User
      */
     public function getIdByToken($accessToken)
     {
-        $user = new \Kubikvest\Model\User();
+        $user = new Model\User();
         try {
             $query = $this->queryBuilder->select('userId')->from('user')->where(['accessToken' => $accessToken]);
             $record = $this->pdo->exec(QueryAssembler::stringify($query))->fetch();
@@ -38,17 +78,32 @@ class User
     }
 
     /**
-     * @param \Kubikvest\Model\User $user
+     * @param Model\User $user
      *
-     * @return \Kubikvest\Model\User
+     * @return Model\User
      */
-    public function save(\Kubikvest\Model\User $user)
+    public function newbie(Model\User $user)
     {
         $query = $this->queryBuilder
-            ->insertInto('user', 'userId', 'accessToken')
-            ->values($user->userId, $user->accessToken);
+            ->insertInto('user', 'userId', 'accessToken', 'kvestId', 'pointId')
+            ->values($user->userId, $user->accessToken, $user->kvestId, $user->pointId);
         $this->pdo->exec(QueryAssembler::stringify($query));
 
         return $user;
+    }
+
+    /**
+     * @param Model\User $user
+     */
+    public function update(Model\User $user)
+    {
+        $query = $this->queryBuilder
+            ->update('user', [
+                'accessToken' => $user->accessToken,
+                'kvestId'     => $user->kvestId,
+                'pointId'     => $user->pointId,
+            ])
+            ->where($user->userId);
+        $this->pdo->exec(QueryAssembler::stringify($query));
     }
 }

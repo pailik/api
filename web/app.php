@@ -34,10 +34,21 @@ $app->get('/auth', function(Request $request) use ($app) {
 
     $data = json_decode($response->getBody()->__toString(), true);
 
-    $user = new Model\User();
-    $user->userId = $data['user_id'];
-    $user->accessToken = $data['access_token'];
-    $app['user.mapper']->save($user);
+    /**
+     * @var \Kubikvest\Model\User $user
+     */
+    $user = $app['user.mapper']->getUser($data['user_id']);
+
+    if ($user->isEmpty()) {
+        $user->userId = $data['user_id'];
+        $user->accessToken = $data['access_token'];
+        $user->kvestId = 1;
+        $user->pointId = 0;
+        $app['user.mapper']->newbie($user);
+    } else {
+        $user->accessToken = $data['access_token'];
+        $app['user.mapper']->updateUser($user);
+    }
 
     return new JsonResponse(
         [
@@ -45,10 +56,10 @@ $app->get('/auth', function(Request $request) use ($app) {
                 'task' => $app['url'] . '/task?t=' . JWT::encode(
                         [
                             'auth_provider' => 'vk',
-                            'user_id'       => $data['user_id'],
+                            'user_id'       => $user->userId,
                             'ttl'           => $data['expires_in'],
-                            'kvest_id'      => 1,
-                            'point_id'      => 0,
+                            'kvest_id'      => $user->kvestId,
+                            'point_id'      => $user->pointId,
                         ],
                         $app['key']
                     ),
@@ -62,7 +73,7 @@ $app->get('/task', function (Request $request) use ($app) {
     $jwt = $request->get('t');
 
     try {
-        $decoded = JWT::decode($jwt, $app['key'], ['HS256']);
+        $data = JWT::decode($jwt, $app['key'], ['HS256']);
     } catch(Exception $e) {
         return new JsonResponse(
             [
@@ -72,21 +83,24 @@ $app->get('/task', function (Request $request) use ($app) {
         );
     }
 
-    $user   = new Model\User();
-    $userId = $user->getIdByToken($decoded['user_id']);
+    /**
+     * @var \Kubikvest\Model\User $user
+     */
+    $user = $app['user.mapper']->getUser($data->user_id);
 
     return new JsonResponse(
         [
-            'description'  => $app['tasks']['kvest_id']['point_id']['description'],
-            'point_id'     => $decoded['point_id'],
-            'total_points' => count($app['tasks']['kvest_id']),
+            'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
+            'point_id'     => $user->pointId,
+            'total_points' => count($app['tasks'][$user->kvestId]),
             'links' => [
-                'checkpoint' => $app['host'] . '/checkpoint?t=' . JWT::encode(
+                'checkpoint' => $app['url'] . '/checkpoint?t=' . JWT::encode(
                         [
                             'auth_provider' => 'vk',
-                            'user_id'       => $userId,
-                            'kvest_id'      => $decoded['kvest_id'],
-                            'point_id'      => $decoded['point_id'],
+                            'user_id'       => $user->userId,
+                            'ttl'           => $data->ttl,
+                            'kvest_id'      => $user->kvestId,
+                            'point_id'      => $user->pointId,
                         ],
                         $app['key']
                     )
@@ -99,9 +113,10 @@ $app->get('/task', function (Request $request) use ($app) {
 $app->get('/checkpoint', function (Request $request) use ($app) {
     $jwt    = $request->get('t');
     $coords = $request->get('c');
+    list($lat, $lon) = explode(',', $coords);
 
     try {
-        $decoded = JWT::decode($jwt, $app['key'], ['HS256']);
+        $data = JWT::decode($jwt, $app['key'], ['HS256']);
     } catch(Exception $e) {
         return new JsonResponse(
             [
@@ -111,21 +126,43 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
         );
     }
 
+    /**
+     * @var \Kubikvest\Model\User $user
+     */
+    $user = $app['user.mapper']->getUser($data->user_id);
+
+    /**
+     * @var Closure $checkCoordinates
+     */
+    $checkCoordinates = $app['checkCoordinates'];
+    if (!$checkCoordinates($user->kvestId, $user->pointId, $lat, $lon)) {
+        //fail
+    }
+
+    if ($user->pointId == count($app['tasks'][$user->kvestId])) {
+        //game end
+    }
+
+    $user->pointId++;
+
+    $app['user.mapper']->update($user);
+
     return new JsonResponse(
         [
-            'description'  => $app['tasks']['kvest_id']['point_id']['description'],
-            'point_id'     => $decoded['point_id'],
-            'total_points' => count($app['tasks']['kvest_id']),
+            'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
+            'point_id'     => $user->pointId,
+            'total_points' => count($app['tasks'][$user->kvestId]),
             'links' => [
-                'nextpoint' => $app['host'] . '/checkpoint?t=' . JWT::encode(
-                    [
-                        'auth_provider' => 'vk',
-                        'client_id'     => $decoded['client_id'],
-                        'kvest_id'      => $decoded['kvest_id'],
-                        'point_id'      => $decoded['point_id'],
-                    ],
-                    $app['key']
-                )
+                'task' => $app['url'] . '/task?t=' . JWT::encode(
+                        [
+                            'auth_provider' => 'vk',
+                            'user_id'       => $user->userId,
+                            'ttl'           => $data->ttl,
+                            'kvest_id'      => $user->kvestId,
+                            'point_id'      => $user->pointId,
+                        ],
+                        $app['key']
+                    )
             ],
         ],
         JsonResponse::HTTP_OK

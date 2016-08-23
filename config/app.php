@@ -3,6 +3,9 @@
 use Silex\Application;
 use GuzzleHttp\Client as GuzzleClient;
 
+const MIN = 0;
+const MAX = 1;
+
 return [
     'debug' => true,
     'client_id'     => getenv('VK_CLIENT_ID'),
@@ -65,4 +68,13 @@ return [
             ],
         ],
     ],
+    'checkCoordinates' => function (Application $app) {
+        return function ($kvestId, $pointId, $latitude, $longitude) use ($app) {
+            $rangePosition = $app['task'][$kvestId][$pointId]['coords'];
+            return $rangePosition['latitude'][MIN] <= $latitude &&
+                $latitude <= $rangePosition['latitude'][MAX] &&
+                $rangePosition['longitude'][MIN] <= $longitude &&
+                $longitude <= $rangePosition['latitude'][MAX];
+        };
+    }
 ];
