@@ -2,11 +2,8 @@
 
 namespace Kubikvest\Model;
 
-class User extends \ActiveRecord\Model
+class User
 {
-    public function getIdByToken($accessToken)
-    {
-        $user = self::find(['accessToken' => $accessToken]);
-        return $user->userId;
-    }
+    public $userId = null;
+    public $accessToken = null;
 }

@@ -16,6 +16,6 @@
     "silex/silex": "v2.0.0",
     "firebase/php-jwt": "v4.0.0",
     "guzzlehttp/guzzle": "6.2.1",
-    "php-activerecord/php-activerecord":"v1.1.2"
+    "packaged/querybuilder":"0.16.1"
   }
 }

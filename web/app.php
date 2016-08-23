@@ -35,12 +35,14 @@ $app->get('/auth', function(Request $request) use ($app) {
     $data = json_decode($response->getBody()->__toString(), true);
 
     $user = new Model\User();
-    $user->get($data['user_id']);
+    $user->userId = $data['user_id'];
+    $user->accessToken = $data['access_token'];
+    $app['user.mapper']->save($user);
 
     return new JsonResponse(
         [
             'links' => [
-                'task' => $app['host'] . '/task?t=' . JWT::encode(
+                'task' => $app['url'] . '/task?t=' . JWT::encode(
                         [
                             'auth_provider' => 'vk',
                             'user_id'       => $data['user_id'],

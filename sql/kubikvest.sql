@@ -8,3 +8,6 @@ CREATE TABLE `user` (
   `userId` bigint(20) unsigned NOT NULL,
   `accessToken` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+insert user (userId, accessToken) value (1111,'asdasd');
