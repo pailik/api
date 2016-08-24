@@ -60,7 +60,25 @@ return [
             [
                 'kvest'       => 1,
                 'point'       => 1,
-                'description' => 'description description 11',
+                'description' => 'Задание 1',
+                'coords' => [
+                    'latitude'  => [10, 20],
+                    'longitude' => [30, 40],
+                ],
+            ],
+            [
+                'kvest'       => 1,
+                'point'       => 2,
+                'description' => 'Задание 2',
+                'coords' => [
+                    'latitude'  => [10, 20],
+                    'longitude' => [30, 40],
+                ],
+            ],
+            [
+                'kvest'       => 1,
+                'point'       => 3,
+                'description' => 'Задание 3. Последнее задание',
                 'coords' => [
                     'latitude'  => [10, 20],
                     'longitude' => [30, 40],
