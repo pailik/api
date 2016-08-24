@@ -131,21 +131,90 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
      */
     $user = $app['user.mapper']->getUser($data->user_id);
 
+    $response = [
+        'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
+        'point_id'     => $user->pointId,
+        'total_points' => count($app['tasks'][$user->kvestId]),
+        'links' => [
+            'task' => $app['url'] . '/task?t=' . JWT::encode(
+                    [
+                        'auth_provider' => 'vk',
+                        'user_id'       => $user->userId,
+                        'ttl'           => $data->ttl,
+                        'kvest_id'      => $user->kvestId,
+                        'point_id'      => $user->pointId,
+                    ],
+                    $app['key']
+                )
+        ],
+    ];
+
     /**
      * @var Closure $checkCoordinates
      */
     $checkCoordinates = $app['checkCoordinates'];
     if (!$checkCoordinates($user->kvestId, $user->pointId, $lat, $lon)) {
-        //fail
+        $response['links']['task'] = $app['url'] . '/task?t=' . JWT::encode(
+            [
+                'auth_provider' => 'vk',
+                'user_id'       => $user->userId,
+                'ttl'           => $data->ttl,
+                'kvest_id'      => $user->kvestId,
+                'point_id'      => $user->pointId,
+            ],
+            $app['key']
+        );
+        $response['error'] = 'Не верное место отметки.';
+    } else {
+        $user->pointId++;
+        $app['user.mapper']->update($user);
     }
 
     if ($user->pointId == count($app['tasks'][$user->kvestId])) {
-        //game end
+        $response['links']['finish'] = $app['url'] . '/finish?t=' . JWT::encode(
+            [
+                'auth_provider' => 'vk',
+                'user_id'       => $user->userId,
+                'ttl'           => $data->ttl,
+                'kvest_id'      => $user->kvestId,
+                'point_id'      => $user->pointId,
+            ],
+            $app['key']
+        );
+    } else {
+        $response['links']['task'] = $app['url'] . '/task?t=' . JWT::encode(
+            [
+                'auth_provider' => 'vk',
+                'user_id'       => $user->userId,
+                'ttl'           => $data->ttl,
+                'kvest_id'      => $user->kvestId,
+                'point_id'      => $user->pointId,
+            ],
+            $app['key']
+        );
     }
 
-    $user->pointId++;
+    return new JsonResponse($response, JsonResponse::HTTP_OK);
+});
 
-    $app['user.mapper']->update($user);
+$app->get('/finish', function (Request $request) use ($app) {
+    $jwt = $request->get('t');
+
+    try {
+        $data = JWT::decode($jwt, $app['key'], ['HS256']);
+    } catch(Exception $e) {
+        return new JsonResponse(
+            [
+                'error' => $e->getMessage(),
+            ],
+            JsonResponse::HTTP_BAD_REQUEST
+        );
+    }
+
+    /**
+     * @var \Kubikvest\Model\User $user
+     */
+    $user = $app['user.mapper']->getUser($data->user_id);
 
     return new JsonResponse(
         [
@@ -153,7 +222,7 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
             'point_id'     => $user->pointId,
             'total_points' => count($app['tasks'][$user->kvestId]),
             'links' => [
-                'task' => $app['url'] . '/task?t=' . JWT::encode(
+                'checkpoint' => $app['url'] . '/checkpoint?t=' . JWT::encode(
                         [
                             'auth_provider' => 'vk',
                             'user_id'       => $user->userId,
