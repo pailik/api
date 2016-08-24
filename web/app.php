@@ -47,7 +47,7 @@ $app->get('/auth', function(Request $request) use ($app) {
         $app['user.mapper']->newbie($user);
     } else {
         $user->accessToken = $data['access_token'];
-        $app['user.mapper']->updateUser($user);
+        $app['user.mapper']->update($user);
     }
 
     return new JsonResponse(
@@ -153,7 +153,7 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
      * @var Closure $checkCoordinates
      */
     $checkCoordinates = $app['checkCoordinates'];
-    if (!$checkCoordinates($user->kvestId, $user->pointId, $lat, $lon)) {
+    if (!$checkCoordinates($user->kvestId, $user->pointId, (int) $lat, (int) $lon)) {
         $response['links']['task'] = $app['url'] . '/task?t=' . JWT::encode(
             [
                 'auth_provider' => 'vk',
@@ -170,7 +170,8 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
         $app['user.mapper']->update($user);
     }
 
-    if ($user->pointId == count($app['tasks'][$user->kvestId])) {
+    $response['description'] = $app['tasks'][$user->kvestId][$user->pointId]['description'];
+    if ($user->pointId == count($app['tasks'][$user->kvestId]) - 1) {
         $response['links']['finish'] = $app['url'] . '/finish?t=' . JWT::encode(
             [
                 'auth_provider' => 'vk',

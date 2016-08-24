@@ -70,11 +70,11 @@ return [
     ],
     'checkCoordinates' => function (Application $app) {
         return function ($kvestId, $pointId, $latitude, $longitude) use ($app) {
-            $rangePosition = $app['task'][$kvestId][$pointId]['coords'];
+            $rangePosition = $app['tasks'][$kvestId][$pointId]['coords'];
             return $rangePosition['latitude'][MIN] <= $latitude &&
                 $latitude <= $rangePosition['latitude'][MAX] &&
                 $rangePosition['longitude'][MIN] <= $longitude &&
-                $longitude <= $rangePosition['latitude'][MAX];
+                $longitude <= $rangePosition['longitude'][MAX];
         };
     }
 ];
