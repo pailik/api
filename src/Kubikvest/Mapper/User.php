@@ -103,7 +103,7 @@ class User
                 'kvestId'     => $user->kvestId,
                 'pointId'     => $user->pointId,
             ])
-            ->where($user->userId);
+            ->where(['userId' => $user->userId]);
         $this->pdo->exec(QueryAssembler::stringify($query));
     }
 }

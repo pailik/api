@@ -131,30 +131,14 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
      */
     $user = $app['user.mapper']->getUser($data->user_id);
 
-    $response = [
-        'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
-        'point_id'     => $user->pointId,
-        'total_points' => count($app['tasks'][$user->kvestId]),
-        'links' => [
-            'task' => $app['url'] . '/task?t=' . JWT::encode(
-                    [
-                        'auth_provider' => 'vk',
-                        'user_id'       => $user->userId,
-                        'ttl'           => $data->ttl,
-                        'kvest_id'      => $user->kvestId,
-                        'point_id'      => $user->pointId,
-                    ],
-                    $app['key']
-                )
-        ],
-    ];
+    $response['total_points'] = count($app['tasks'][$user->kvestId]);
 
     /**
      * @var Closure $checkCoordinates
      */
     $checkCoordinates = $app['checkCoordinates'];
     if (!$checkCoordinates($user->kvestId, $user->pointId, (int) $lat, (int) $lon)) {
-        $response['links']['task'] = $app['url'] . '/task?t=' . JWT::encode(
+        $response['links']['checkpoint'] = $app['url'] . '/checkpoint?t=' . JWT::encode(
             [
                 'auth_provider' => 'vk',
                 'user_id'       => $user->userId,
