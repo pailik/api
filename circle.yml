@@ -1,28 +1,11 @@
 machine:
   services:
     - docker
-  pre:
-    - sudo curl -L -o /usr/bin/docker 'http://s3-external-1.amazonaws.com/circle-downloads/docker-1.6.2-circleci'; sudo chmod 0755 /usr/bin/docker; true
-  php:
-    version: 5.6.5
 
 dependencies:
   pre:
-    - composer install --prefer-source --no-interaction
-    - docker build -f teleport.docker -t imega/teleport .
-    - mkdir -p ./build/db
-    - docker run -d --name "teleport_db" -v $PWD/build/db:/var/lib/mysql imega/mysql
-    - mysql -e "CREATE DATABASE teleport"
-    - sed -e 's/{$table_prefix}//g' build/sql/tabs.sql | mysql teleport
-    - docker run --link teleport_db:teleport_db imega/mysql-client:1.1.0 mysqladmin --silent --host=teleport_db --wait=5 ping
-    - docker run -v $PWD/build/sql:/sql --link teleport_db:teleport_db imega/mysql-client:1.1.0 mysql --host=teleport_db -e "source /sql/teleport.sql"
-    - docker run -v $PWD/build/sql:/sql --link teleport_db:teleport_db imega/mysql-client:1.1.0 mysql --host=teleport_db -e "source /sql/teleport_enable.sql"
-    - docker run -d --name "teleport" --link teleport_db:teleport_db -v $PWD:/app imega/teleport php-fpm -F -d error_reporting=E_ALL -d log_errors=On -d error_log=/dev/stdout -d display_errors=On
-    - docker run -d --name teleport_nginx --link teleport:service -v $PWD/build/sites-enabled:/etc/nginx/sites-enabled -v $PWD/build/conf.d:/etc/nginx/conf.d -v $PWD/build/entrypoints/teleport-nginx.sh:/teleport-nginx.sh -p 80:80 --entrypoint=/teleport-nginx.sh leanlabs/nginx
-  post:
-    - rm -r ~/.gradle
+    - sudo apt-get install -y make
 
 test:
-  override:
-    - sleep 10
-    - DB_HOST=127.0.0.1 BASE_URL=127.0.0.1 vendor/bin/phpunit
+  pre:
+    - cd tests/mock-servers/vk; make test; make destroy
