@@ -132,7 +132,7 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
     $user = $app['user.mapper']->getUser($data->user_id);
 
     $response['total_points'] = count($app['tasks'][$user->kvestId]);
-
+    $response['finish']       = false;
     /**
      * @var Closure $checkCoordinates
      */
@@ -155,7 +155,7 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
     }
 
     $response['description'] = $app['tasks'][$user->kvestId][$user->pointId]['description'];
-    if ($user->pointId == count($app['tasks'][$user->kvestId]) - 1) {
+    if ($user->pointId == count($app['tasks'][$user->kvestId])) {
         $response['links']['finish'] = $app['url'] . '/finish?t=' . JWT::encode(
             [
                 'auth_provider' => 'vk',
@@ -166,6 +166,9 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
             ],
             $app['key']
         );
+        $user->pointId = 0;
+        $app['user.mapper']->update($user);
+        $response['finish'] = true;
     } else {
         $response['links']['task'] = $app['url'] . '/task?t=' . JWT::encode(
             [
