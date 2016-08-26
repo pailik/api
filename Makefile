@@ -7,7 +7,7 @@ build: composer
 	@docker build -t kubikvest/api .
 
 composer:
-	@docker run --rm -v $(CURDIR):/data imega/composer install --ignore-platform-reqs --no-interaction
+	@-docker run --rm -v $(CURDIR):/data imega/composer install --ignore-platform-reqs --no-interaction
 
 start: build
 	@docker run -d --name "kubikvest_db" -v $(CURDIR)/mysql.conf.d:/etc/mysql/conf.d imega/mysql
@@ -55,12 +55,12 @@ test: build
 
 	@docker run -d --name "kubikvest_db" imega/mysql
 
-	@docker run --rm \
+	@-docker run --rm \
 		--link kubikvest_db:kubikvest_db \
 		imega/mysql-client \
 		mysqladmin --silent --host=kubikvest_db --wait=5 ping
 
-	@docker run --rm \
+	@-docker run --rm \
 		-v $(CURDIR)/sql:/sql \
 		--link kubikvest_db:kubikvest_db \
 		imega/mysql-client \
@@ -94,13 +94,13 @@ test: build
 		leanlabs/nginx
 
 stop:
-	-docker stop $(CONTAINERS)
+	@-docker stop $(CONTAINERS)
 
 clean: stop
-	-docker rm -fv $(CONTAINERS)
+	@-docker rm -fv $(CONTAINERS)
 
 destroy: clean
-	cd tests/mock-servers/vk;make destroy
-	-docker rmi -f $(IMAGES)
+	@-cd tests/mock-servers/vk;make destroy
+	@-docker rmi -f $(IMAGES)
 
 .PHONY: build

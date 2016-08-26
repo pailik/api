@@ -9,3 +9,4 @@ dependencies:
 test:
   pre:
     - cd tests/mock-servers/vk; make test; make destroy
+    - make test -I tests/
