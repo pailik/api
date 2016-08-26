@@ -2,6 +2,7 @@ include vars.mk
 
 IMAGES = kubikvest/api
 CONTAINERS = kubikvest_db kubikvest kubikvest_nginx
+DOCKER_RM = false
 
 build: composer
 	@docker build -t kubikvest/api .
@@ -92,6 +93,13 @@ test: build
 		-p 8300:80 \
 		-v $(CURDIR)/sites-enabled:/etc/nginx/sites-enabled \
 		leanlabs/nginx
+
+	@docker run --rm=$(DOCKER_RM) \
+		-v $(CURDIR)/tests:/data \
+		-w /data \
+		--link kubikvest_nginx:service \
+		alpine \
+		sh -c 'apk add --update bash curl && ./test.sh service'
 
 stop:
 	@-docker stop $(CONTAINERS)
