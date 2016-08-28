@@ -8,6 +8,7 @@ class User
     public $accessToken = null;
     public $kvestId = null;
     public $pointId = null;
+    public $startTask = null;
 
     /**
      * @return bool
