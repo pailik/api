@@ -99,7 +99,7 @@ test: build
 		-w /data \
 		--link kubikvest_nginx:service \
 		alpine \
-		sh -c 'apk add --update bash curl && ./test.sh service'
+		sh -c 'apk add --update bash curl jq && ./test.sh service'
 
 stop:
 	@-docker stop $(CONTAINERS)

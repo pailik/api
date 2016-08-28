@@ -40,10 +40,19 @@ testTask() {
 
     assertTrue 200 $ACTUAL "$FUNCNAME Code"
 
-    EXPECTED='{"description":"\u0412\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u043f\u0440\u0438\u0439\u0442\u0438 \u0441\u044e\u0434\u0430 \u0447\u0442\u043e\u0431\u044b \u043d\u0430\u0447\u0430\u0442\u044c","point_id":0,"total_points":4,"links":{"checkpoint":"http:\/\/kubikvest.xyz\/checkpoint?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw"}}'
-    ACTUAL=$(curl --silent "http://$URL/task?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw")
+    BODY=$(curl --silent "http://$URL/task?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw")
 
-    assertTrue "$EXPECTED" "$ACTUAL" "$FUNCNAME body"
+    DESCRIPTION=$(echo $BODY | jq '.description' | sed -e 's/^"//' -e 's/"$//')
+    assertTrue "Вы должны прийти сюда чтобы начать" "$DESCRIPTION" "$FUNCNAME DESCRIPTION"
+
+    POINT_ID=$(echo $BODY | jq '.point_id' | sed -e 's/^"//' -e 's/"$//')
+    assertTrue "0" "$POINT_ID" "$FUNCNAME POINT_ID"
+
+    TOTAL_POINTS=$(echo $BODY | jq '.total_points' | sed -e 's/^"//' -e 's/"$//')
+    assertTrue "4" "$TOTAL_POINTS" "$FUNCNAME TOTAL_POINTS"
+
+    CHECKPOINT=$(echo $BODY | jq '.links.checkpoint' | sed -e 's/^"//' -e 's/"$//')
+    assertTrue "http://kubikvest.xyz/checkpoint?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw" "$CHECKPOINT" "$FUNCNAME CHECKPOINT"
 }
 
 testAuth

@@ -47,6 +47,23 @@ return [
         return new \Kubikvest\Mapper\User($app['pdo'], $app['queryBuilder']);
     },
     'tasks' => [
+        0 => [
+            [
+                'kvest'       => 0,
+                'point'       => 0,
+                'title'       => 'Title',
+                'description' => 'Description',
+                'coords' => [
+                    'latitude'  => [0, 100],
+                    'longitude' => [0, 100],
+                ],
+                'prompt' => [
+                    20 => 'First prompt',
+                    40 => 'Secont prompt',
+                    60 => 'Answer',
+                ],
+            ],
+        ],
         1 => [
             [
                 'kvest'       => 1,
