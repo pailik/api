@@ -8,7 +8,8 @@ CREATE TABLE `user` (
   `userId` bigint(20) unsigned NOT NULL,
   `accessToken` varchar(255) DEFAULT NULL,
   `kvestId` int(10) unsigned,
-  `pointId` int(10) unsigned
+  `pointId` int(10) unsigned,
+  `startTask` datetime
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
