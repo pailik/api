@@ -52,7 +52,7 @@ testTask() {
     assertTrue "4" "$TOTAL_POINTS" "$FUNCNAME TOTAL_POINTS"
 
     CHECKPOINT=$(echo $BODY | jq '.links.checkpoint' | sed -e 's/^"//' -e 's/"$//')
-    assertTrue "http:\/\/kubikvest.xyz\/checkpoint?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw" "$CHECKPOINT" "$FUNCNAME CHECKPOINT"
+    assertTrue "http://kubikvest.xyz/checkpoint?t=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdXRoX3Byb3ZpZGVyIjoidmsiLCJ1c2VyX2lkIjo2Njc0OCwidHRsIjo0MzIwMCwia3Zlc3RfaWQiOjEsInBvaW50X2lkIjowfQ.V0d2cNMNMretk_QMR5oa7fYHorrV2MhHTBwA8DsJffw" "$CHECKPOINT" "$FUNCNAME CHECKPOINT"
 }
 
 testAuth
