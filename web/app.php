@@ -88,26 +88,41 @@ $app->get('/task', function (Request $request) use ($app) {
      */
     $user = $app['user.mapper']->getUser($data->user_id);
 
-    return new JsonResponse(
-        [
-            'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
-            'point_id'     => $user->pointId,
-            'total_points' => count($app['tasks'][$user->kvestId]),
-            'links' => [
-                'checkpoint' => $app['url'] . '/checkpoint?t=' . JWT::encode(
-                        [
-                            'auth_provider' => 'vk',
-                            'user_id'       => $user->userId,
-                            'ttl'           => $data->ttl,
-                            'kvest_id'      => $user->kvestId,
-                            'point_id'      => $user->pointId,
-                        ],
-                        $app['key']
-                    )
-            ],
+    $response = [
+        'description'  => $app['tasks'][$user->kvestId][$user->pointId]['description'],
+        'point_id'     => $user->pointId,
+        'total_points' => count($app['tasks'][$user->kvestId]),
+        'links' => [
+            'checkpoint' => $app['url'] . '/checkpoint?t=' . JWT::encode(
+                    [
+                        'auth_provider' => 'vk',
+                        'user_id'       => $user->userId,
+                        'ttl'           => $data->ttl,
+                        'kvest_id'      => $user->kvestId,
+                        'point_id'      => $user->pointId,
+                    ],
+                    $app['key']
+                )
         ],
-        JsonResponse::HTTP_OK
-    );
+    ];
+
+    if (null === $user->startTask) {
+        $user->startTask = date('Y-m-d h:i:s');
+        $app['user.mapper']->setStartTask($user);
+    }
+
+    $response['start_task'] = $user->startTask;
+
+    $startTask  = new DateTime($user->startTask);
+    $sinceStart = $startTask->diff(new DateTime());
+
+    foreach ($app['tasks'][$user->kvestId][$user->pointId]['prompt'] as $k => $v) {
+        if ($sinceStart->i >= $k) {
+            $response['prompt'] = $v;
+        }
+    }
+
+    return new JsonResponse($response, JsonResponse::HTTP_OK);
 });
 
 $app->get('/checkpoint', function (Request $request) use ($app) {
