@@ -166,6 +166,7 @@ $app->get('/checkpoint', function (Request $request) use ($app) {
         $response['error'] = 'Не верное место отметки.';
     } else {
         $user->pointId++;
+        $user->startTask = null;
         $app['user.mapper']->update($user);
     }
 
